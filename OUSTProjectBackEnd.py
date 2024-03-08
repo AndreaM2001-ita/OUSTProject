@@ -1,6 +1,14 @@
 #-------------------------------------------------------------
 #   Group Assignment for Distributed Systems
-#   
+#   OUST eligibility to honours for student and outside individuals
+#   - this code prints out the different scores reported by student
+#   - calculates the average values of the scores stored in a dictionary
+#   - calculates the avergae of the best 8 scores reported by the student
+#   - determines eleigbility for honours
+#
+#   authors:
+#   Andrea Marcosano 10541054
+#   Maryam Saqib 10661276
 #-------------------------------------------------------------
 #function to print out the dictionary of the unitcode and correspective scores in order
 def printUnitScores(unitScores):
