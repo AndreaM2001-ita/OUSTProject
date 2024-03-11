@@ -23,6 +23,7 @@ def calculateAvg(unitScores):
         sum=sum+score;
         count=count+1
     average=sum/count;  #average calculation
+    average=round(average, 2)
     return average
 
 
@@ -47,6 +48,7 @@ def averageEight(scoreList):
         sum=sum+score;
         count=count+1
     avgEight=sum/count;  #average calculation
+    avgEight=round(avgEight, 2)
     return avgEight
             
 #function to find the 8 best scores in the dictionary     
@@ -61,10 +63,54 @@ def selectEightScores(unitScores):
     avgEight=averageEight(scoresList)
     
     #print result
-    print("The average of the best 8 scores is: ",avgEight);
+    #print("The average of the best 8 scores is: ",avgEight);
+    return avgEight
+
+#function to count the amount of failed units
+def countFails(unitScores):
+    count=0
+    for unit_code, score in unitScores.items():
+        if score<50:
+            count=count+1
+    return count
     
 
+#function to verify eligibility of student for honoruns studies
+def verifyEligibility(studentID,unitScores):
+    average=calculateAvg(unitScores);
+    avgEight=selectEightScores(unitScores);
+
+    if len(unitScores)<=15:
+        print(studentID," ",average, ", completed less than 16 units!\n DOES NOT QUALIFY FOR HONOURS STUDY! ")
+        return;
+
+    if countFails(unitScores)>=6:
+        print(studentID," ",average, ", with 6 or more Fails\n DOES NOT QUALIFY FOR HONOURS STUDY! ")
+        return;
+
+    if average>=70:
+         print(studentID," ",average, ", QUALIFY FOR HONOURS STUDY! ")
+         return;
+    elif average>=65 and avgEight>=80:
+        print(studentID," ",average," ",avgEight, ", QUALIFY FOR HONOURS STUDY! ")
+        return;
+    elif average>=65 and avgEight<80:
+        print(studentID," ",average," ",avgEight, ", MAY HAVE GOOD CHANCE!, Need further assessment!")
+        return;
+    elif average>=60 and avgEight>=80:
+        print(studentID," ",average," ",avgEight, ", MAY HAVE A CHANCE!, Must be carefully reassessed and get the coodrinator's permission!")
+        return;
+    else:
+        print(studentID," ",average, ", DOES NOT QUALIFY FOR HONOURS STUDY! ")
+        return;
+        
+        
+        
+
 if __name__ == '__main__':
+    #example student ID
+    studentID=12345678
+    
    #dictionary of unit scores
     unitScores = {
         "unit000": 16.3,
@@ -100,9 +146,7 @@ if __name__ == '__main__':
     }
 
     printUnitScores(unitScores); #print the cores in order
-    average=calculateAvg(unitScores);#TODO--pass student id to show on screen
-    print("the average of the student is: ", round(average, 2));
 
-    selectEightScores(unitScores)
+    verifyEligibility(studentID,unitScores)
     #TODO-- implpement eligibility criteria
     
