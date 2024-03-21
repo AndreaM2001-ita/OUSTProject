@@ -21,7 +21,7 @@ def isValidEmail(email):
     if "@" in email and "." in email and len(email) <= 40:
         return True
     else:
-        print("Oops! That looks incorrect, please try again!")
+        print("Error... That looks incorrect, please try again!")
         return False
 
 # Function to validate first and last name
@@ -39,7 +39,7 @@ def isValidUnitCode(unit_code):
     if len(unit_code) <= 7:
         return True
     else:
-        print("Oh no! Unit code should be 7 characters or less. Please try again!.")
+        print("Error... Unit code should be 7 characters or less. Please try again!.")
         return False
 
 # Function to validate Mark
@@ -47,10 +47,10 @@ def isValidMark(mark):
     try:
         mark = float(mark)
         # Check if mark is between 0.0 and 100.0
-        if 0.0 <= mark <= 100.0:
+        if 0.0 >= mark and mark <= 100.0:
             return True
         else:
-            print("Yikes. Try inputting your marks between 0.00 and 100.00.")
+            print("Error... Try inputting your marks between 0.00 and 100.00.")
             return False
     except ValueError:
         print("Slow down! Your answer seems incorrect. Try again!")
