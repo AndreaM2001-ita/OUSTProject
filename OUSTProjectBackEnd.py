@@ -10,6 +10,9 @@
 #   Andrea Marcosano 10541054
 #   Maryam Saqib 10661276
 #-------------------------------------------------------------
+import ServerSocket
+import socket
+import sys  #operating system package - save error in machine in case
 #function to print out the dictionary of the unitcode and correspective scores in order
 def printUnitScores(unitScores):
     for unit_code, score in unitScores.items():
@@ -81,33 +84,46 @@ def verifyEligibility(studentID,unitScores):
     avgEight=selectEightScores(unitScores);
 
     if len(unitScores)<=15:
-        print(studentID," ",average, ", completed less than 16 units!\n DOES NOT QUALIFY FOR HONOURS STUDY! ")
-        return;
-
+        message=studentID+" "+str(average)+ ", completed less than 16 units!\nDOES NOT QUALIFY FOR HONOURS STUDY! "
+        return message
     if countFails(unitScores)>=6:
-        print(studentID," ",average, ", with 6 or more Fails\n DOES NOT QUALIFY FOR HONOURS STUDY! ")
-        return;
-
+        message=studentID+" "+str(average)+ ", with 6 or more Fails\nDOES NOT QUALIFY FOR HONOURS STUDY! "
+        return message
     if average>=70:
-         print(studentID," ",average, ", QUALIFY FOR HONOURS STUDY! ")
-         return;
+        message=studentID+" "+str(average)+ ", QUALIFY FOR HONOURS STUDY! "
     elif average>=65 and avgEight>=80:
-        print(studentID," ",average," ",avgEight, ", QUALIFY FOR HONOURS STUDY! ")
-        return;
+        message=studentID+" "+str(average)+" "+str(avgEight)+", QUALIFY FOR HONOURS STUDY! "
     elif average>=65 and avgEight<80:
-        print(studentID," ",average," ",avgEight, ", MAY HAVE GOOD CHANCE!, Need further assessment!")
-        return;
+        message=studentID+" "+str(average)+" "+str(avgEight)+ ", MAY HAVE GOOD CHANCE!, Need further assessment!"
     elif average>=60 and avgEight>=80:
-        print(studentID," ",average," ",avgEight, ", MAY HAVE A CHANCE!, Must be carefully reassessed and get the coodrinator's permission!")
-        return;
+        message=studentID+" "+str(average)+" "+str(avgEight)+ ", MAY HAVE A CHANCE!, Must be carefully reassessed and get the coodrinator's permission!"
     else:
-        print(studentID," ",average, ", DOES NOT QUALIFY FOR HONOURS STUDY! ")
-        return;
-        
-        
+        message=studentID+" "+str(average)+ ", DOES NOT QUALIFY FOR HONOURS STUDY! "
+    return message
         
 
 if __name__ == '__main__':
+
+    socket=ServerSocket.connectSocket()
+    while True:
+        # Wait for a connection
+        print( 'Waiting for a connection')
+        connection, client_address = socket.accept()
+
+
+        print('connection from', client_address)
+        try:
+            # Receive the data in small chunks and retransmit it
+            while True:
+                data=ServerSocket.decodeData(connection)  #decode recived data 
+                message=verifyEligibility(data['student_id'],data['unit_scores']) #verify eligibility
+                message+="\\n" # add finish character
+                ServerSocket.sendMessage(message,connection) #send result
+                break
+        finally:
+            ServerSocket.closeSocket(socket)
+            break
+    """
     #example student ID
     studentID=12345678
     
@@ -148,5 +164,5 @@ if __name__ == '__main__':
     printUnitScores(unitScores); #print the cores in order
 
     verifyEligibility(studentID,unitScores)
-    #TODO-- implpement eligibility criteria
-    
+
+    """

@@ -1,4 +1,16 @@
+#-------------------------------------------------------------
+#   Group Assignment for Distributed Systems
+#   OUST eligibility to honours for student and outside individuals
+#   - this code takes and verify all inputs asked to user  
+#   - studentID name lastname 
+#  -makes requests to serverfor students
+#
+#   authors:
+#   Andrea Marcosano 10541054
+#   Maryam Saqib 10661276
+#-------------------------------------------------------------
 from datetime import datetime
+import ClientSocket
 
 # Function to validate date of birth
 def isValidDOB(dob_str):
@@ -45,9 +57,9 @@ def isValidUnitCode(unit_code):
 # Function to validate Mark
 def isValidMark(mark):
     try:
-        mark = float(mark)
+        print(mark)
         # Check if mark is between 0.0 and 100.0
-        if 0.0 >= mark and mark <= 100.0:
+        if 0.0 <= mark <= 100.0:
             return True
         else:
             print("Error... Try inputting your marks between 0.00 and 100.00.")
@@ -107,13 +119,17 @@ def get_student_input():
             # Validate unit code
             if isValidUnitCode(unit_code):
                 break
-
-            mark = input(f"Enter marks for unit {unit_code}: ")
-            # Validate mark
-            if isValidMark(mark):
+        while True:  
+            try:
+                mark = input(f"Enter marks for unit {unit_code}: ")
                 mark = float(mark)
-                unit_scores[unit_code] = mark
-                break
+                # Validate mark
+                if isValidMark(mark):
+                    unit_scores[unit_code] = mark
+                    break
+            except ValueError:
+                print("Looks like you put in the wrong number, try again!")
+            
 
     return student_id, name, last_name, email, dob, unit_scores
 
@@ -121,14 +137,28 @@ def get_student_input():
 def main():
     # Get input from the user
     student_id, name, last_name, email, dob, unit_scores = get_student_input()
-    
-    # Call server-side functions
-    average = server.calculateAvg(unit_scores)
-    avg_eight = server.selectEightScores(unit_scores)
-    fails = server.countFails(unit_scores)
-    
-    # Verify eligibility
-    server.verifyEligibility(student_id, name, last_name, email, dob, average, avg_eight, fails)
+
+    #student_id=12345678
+    #name="andrea"
+    #last_name="marcosano"
+    #unit_scores={}
+    #unit_scores["abc"]=23
+    #unit_scores["def"]=25
+
+    try:
+        socket=ClientSocket.connectSocket()
+
+        while True:
+
+            message=ClientSocket.messageHandler(student_id, name, last_name, unit_scores)
+
+            ClientSocket.sendMessage(message,socket)
+
+            responce=ClientSocket.decodeData(socket)
+            print(responce)
+            break
+    finally:
+        ClientSocket.closeSocket(socket)
 
 if __name__ == "__main__":
     main()
