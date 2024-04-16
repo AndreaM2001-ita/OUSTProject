@@ -1,15 +1,23 @@
 import socket
+import time
 import sys
 
 def connectSocket():
-    # Create a TCP/IP socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # Connect the socket to the port where the server is listening
-    server_address = ('localhost', 10000)
-    print('connecting to %s port %s' % server_address)
-    sock.connect(server_address)
-    return sock
+    for attempt in range(5): #retry connection for 5 times
+        try:
+            # Create a TCP/IP socket
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+            # Connect the socket to the port where the server is listening
+            server_address = ('localhost', 10000)
+            print('connecting to %s port %s' % server_address)
+            sock.connect(server_address)
+            return sock
+        except ConnectionRefusedError:  #in case connection is rerfused because server is down 
+            print("Connection refused. Retrying...")
+            time.sleep(1)  # Wait before retrying
+            continue
 
 #function to close socket
 def closeSocket(socket):
@@ -18,14 +26,15 @@ def closeSocket(socket):
     socket.close()
 
 #fucntion to create a message within one string to be sent to server 
-def messageHandler(student_id, name, last_name, unit_scores):
+def messageHandler(user_id, unit_scores="", name="", last_name="",email=""):
     # Create a dictionary with your message
     message_dict = {
-        'student_id': student_id,
+        'user_id': user_id,
         'name': name,
         'last_name': last_name,
+        'email': email,
         'unit_scores': unit_scores,
-        # Add more key-value pairs as needed
+
     }
 
     # Convert the dictionary to a string representation
@@ -41,7 +50,6 @@ def messageHandler(student_id, name, last_name, unit_scores):
             message_string += f"{key}:{value}\n"
     
     message_string+="\\n"
-
     return message_string
 
 #function to send the message to server

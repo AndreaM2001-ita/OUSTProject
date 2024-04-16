@@ -8,7 +8,6 @@
 #
 #   authors:
 #   Andrea Marcosano 10541054
-#   Maryam Saqib 10661276
 #-------------------------------------------------------------
 import ServerSocket
 import socket
@@ -20,7 +19,7 @@ def printUnitScores(unitScores):
 
 #function to calculate the avergae of the scores in the dictionary 
 def calculateAvg(unitScores):
-    sum=0;
+    sum=0
     count=0
     for unit_code, score in unitScores.items():
         sum=sum+score;
@@ -116,13 +115,17 @@ if __name__ == '__main__':
             # Receive the data in small chunks and retransmit it
             while True:
                 data=ServerSocket.decodeData(connection)  #decode recived data 
-                message=verifyEligibility(data['student_id'],data['unit_scores']) #verify eligibility
-                message+="\\n" # add finish character
+                if data['unit_scores']!="{}":
+                    message=verifyEligibility(data['user_id'],data['unit_scores']) #verify eligibility
+                    message+="\\n" # add finish character
+                else:
+                    print("implement database")
+                    message="databse not implemented\\n"
                 ServerSocket.sendMessage(message,connection) #send result
-                break
+                #break
         finally:
             ServerSocket.closeSocket(socket)
-            break
+            #break
     """
     #example student ID
     studentID=12345678

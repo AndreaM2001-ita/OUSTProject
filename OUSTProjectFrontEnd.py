@@ -9,156 +9,222 @@
 #   Andrea Marcosano 10541054
 #   Maryam Saqib 10661276
 #-------------------------------------------------------------
-from datetime import datetime
 import ClientSocket
 
-# Function to validate date of birth
-def isValidDOB(dob_str):
-    try:
-        # Convert dob str to datetime object
-        dob = datetime.strptime(dob_str, '%d/%m/%Y')
-        # Check if dob is after 1900
-        if dob.year >= 1900:
-            return True
-        else:
-            print("Birth year should begin after 1900, please try again.")
-            return False
-    except ValueError:
-        print("Seems like your format might be invalid. Try again using DD/MM/YYYY")
-        return False
+#function to welcome user
+def welcome():
+    print("Welcome to the OUST Honours Enrolling systems!")
+    print("before proceeding with your enrollement we would like to verify your eligibility")
+    print("----------------------------------------------------------------")
+#multiuse function to ask user for any request with an answer that requires to be y or n
+def yesOrNo(question):
+    while True:
+        try:
+            print(question)
+            answer = input("Enter Y/N for Yes/No: ")
+            answer=answer.lower()#make it lower case to avoid issues with upper case
+            if answer=='y' or answer=='n':
+                break
+            else:
+                print("Looks like you've entered an unrecognised character, try again")
+        except ValueError:
+            print("Error... wrong input, try again... ")
+    return answer
 
-# Function to validate email
+# Function to verify correct input of name and last name
+def verifyString(name):
+    # Check if the name only contains letters and it is within boundaries of length
+    if name.isalpha() and len(name) <= 20:
+        return True
+    else:
+        print("Looks like you've either exceeded your character limit (20) or typed it incorrectly. Try again!")
+        return False
+    
+# Function to verifty the correctness of email entered
 def isValidEmail(email):
     # Basic email format validation
     if "@" in email and "." in email and len(email) <= 40:
         return True
     else:
-        print("Error... That looks incorrect, please try again!")
+        print("ERROR... email format is incorrect, try again...")
         return False
-
-# Function to validate first and last name
-def isValidName(name):
-    # Check if the name only contains alphabets and is within limits
-    if name.isalpha() and len(name) <= 20:
-        return True
-    else:
-        print("Looks like you've either exceeded your character limit or typed it incorrectly. Try again!")
-        return False
-
-# Function to validate unit code
-def isValidUnitCode(unit_code):
-    # Check if the unit code is 7 characters or less
-    if len(unit_code) <= 7:
-        return True
-    else:
-        print("Error... Unit code should be 7 characters or less. Please try again!.")
-        return False
-
-# Function to validate Mark
-def isValidMark(mark):
-    try:
-        print(mark)
-        # Check if mark is between 0.0 and 100.0
-        if 0.0 <= mark <= 100.0:
-            return True
-        else:
-            print("Error... Try inputting your marks between 0.00 and 100.00.")
-            return False
-    except ValueError:
-        print("Slow down! Your answer seems incorrect. Try again!")
-        return False
-
-# Function to get input from user
-def get_student_input():
+    
+def getId(identity):
     while True:
-        try:
-            student_id = int(input("Enter your student ID: "))
+        try: #student or person ID
+            studentId = input(f"Enter your {identity} ID: ") #use identity variable to make fucnction reusable in both settings 
             # Check if student ID is 8 digits or less
-            if len(str(student_id)) <= 8:
+            if len(str(studentId)) <= 8:
                 break
             else:
-                print("Looks like you've exceed the word count. Try again bud!")
+                print("The user ID entered is too long, try again...")
         except ValueError:
-            print("Oopsies! Wrong student ID number. Try again! ")
+            print("ERROR... wrong user ID ")
 
+#fucntion to get user details as input
+def getStudentDetails():
+    
+    student_id=getId("Student")
     while True:
         name = input("Enter your name: ")
         # Validate name
-        if isValidName(name):
+        if verifyString(name):
             break
 
     while True:
         last_name = input("Enter your last name ")
         # Validate last name
-        if isValidName(last_name):
+        if verifyString(last_name):
             break
-
+    
     while True:
         email = input("Enter your personal email address  ")
         # Validate email
         if isValidEmail(email):
             break
-
+    return student_id, name,last_name,email
+# Function to validate unit code
+def isValidUnitCode(unit):
     while True:
-        dob = input("Enter your date of birth (DD/MM/YYYY): ")
-        # Validate dob
-        if isValidDOB(dob):
-            break
-    
+        unit_code=input(f"Enter unit code for unit {unit + 1}: " )
+        # Check if the unit code is 7 characters or less
+        if len(unit_code) <= 7:  #length on assignment script
+            return unit_code
+        else:
+            print("Error... Unit code should be 7 characters or less. Please try again!.")
+
+# Function to validate Mark
+def isValidMark(unit_code,addition):
+    while True:
+        try:
+             #adding addition string to reuse function for all cases of input
+            mark = input(f"Enter your {addition} mark for unit {unit_code}: ") 
+            mark = float(mark)
+            # Check if mark is between 0.0 and 100.0
+            if 0.0 <= mark <= 100.0:
+                return mark
+            else:
+                print("Error... mark has to be between 0.0 and 100.0")
+        except ValueError:
+            print("ERROR...Your answer seems incorrect. Try again!")
+#output in case of missed eligibitlity check
+def missedEligibility():
+    print("!!!-----------------------------------------------------------------------")
+    print("Unfortuantely you will not be eligible for Honours")
+    print("No more than 2 fails for one unit allowed")
+    print("!!!-----------------------------------------------------------------------")
+#handling of fails in grades
+def handleFailures(mark, unit_code, unit_scores, fails):
+    iterations=0
+    new_unit_code = f"{unit_code}_{iterations + 1}"  # Append iteration number to unit code
+    unit_scores[new_unit_code] = mark
+    while iterations<fails:
+        iterations+=1
+        #if it the last unit the program should ask for a passing score 
+        #otherwise th eonly other case is interting a second fail score
+        mark = isValidMark(unit_code, "passing" if iterations==(fails) else "second")
+        if mark<50.0 and iterations==fails: #case in which user is trying to enter 3 fails, whilst only admitting 2
+            missedEligibility()
+            return -1
+        new_unit_code = f"{unit_code}_{iterations + 1}"  # Append iteration number to unit code
+        unit_scores[new_unit_code] = mark
+        
+#function to check if the grade was a fail and if it was how many times it was repeated    
+def checkFail(mark, unit_code,unit_scores):
+    while True:
+        try:
+            if mark<50.0: #grade is a fail
+                fails=int(input(f"How many times have you failed unit {unit_code}?: "))
+                if fails >2:
+                    missedEligibility()
+                    return -1
+                elif fails>0 and fails<=2:
+                    if handleFailures(mark, unit_code, unit_scores, fails)==-1:
+                        return -1
+                    break
+            else:
+                unit_scores[unit_code] = mark
+        except ValueError:
+            print("ERROR...Your answer seems incorrect. Try again!")
+
+#get details on person(if not student)
+#For example, OUST doesn’t allow the students do any unit more than three times. 
+def getPersonDetails():
+    person_id=getId("Person")
+    print("As you are not a current student, please enter your unit codes and marks.")
+    print("--------------------------------------------------------------------------")
     unit_scores = {}
     while True:
         try:
             num_units = int(input("Enter the number of units taken: "))
-            break
-        except ValueError:
-            print("Looks like you put in the wrong number, try again!")
-
-    for i in range(num_units):
-        while True:
-            unit_code = input(f"Enter unit code for unit {i + 1}: ")
-            # Validate unit code
-            if isValidUnitCode(unit_code):
+            #checking that number of units is apporpriate
+            if num_units <16 or num_units >30:
+                print("ERROR... number of units taken is invalid")
+            else:
                 break
-        while True:  
-            try:
-                mark = input(f"Enter marks for unit {unit_code}: ")
-                mark = float(mark)
-                # Validate mark
-                if isValidMark(mark):
-                    unit_scores[unit_code] = mark
-                    break
-            except ValueError:
-                print("Looks like you put in the wrong number, try again!")
-            
-
-    return student_id, name, last_name, email, dob, unit_scores
-
-# Main function
-def main():
-    # Get input from the user
-    student_id, name, last_name, email, dob, unit_scores = get_student_input()
-
-    #student_id=12345678
-    #name="andrea"
-    #last_name="marcosano"
-    #unit_scores={}
-    #unit_scores["abc"]=23
-    #unit_scores["def"]=25
-
-    try:
-        socket=ClientSocket.connectSocket()
-
-        while True:
-
-            message=ClientSocket.messageHandler(student_id, name, last_name, unit_scores)
-
-            ClientSocket.sendMessage(message,socket)
-
-            responce=ClientSocket.decodeData(socket)
-            print(responce)
-            break
-    finally:
-        ClientSocket.closeSocket(socket)
-
+        except ValueError:
+            print("Error... wrong value")
+    #insert unit scores 
+    for unit in range(num_units):
+        unit_code = isValidUnitCode(unit)
+        mark=isValidMark(unit_code,"")
+        if checkFail(mark, unit_code,unit_scores)==-1:
+            return person_id,None  #if theere is a class that user failed more than 3 times program will return non eligibilty
+    return person_id, unit_scores
+#main
 if __name__ == "__main__":
-    main()
+    while True:
+        welcome()
+        
+        # Get input from the user
+        student=yesOrNo("Are you a current student of OUST?")  #ask if it is a student
+        #if user is student ask if they want to insert their own scores or they want ot make a request to database
+        if student=='y': request=yesOrNo("Would you like to insert your own unit scores?")
+        if student=='y' and request=='y':
+            userId, name, last_name, email= getStudentDetails()
+            unit_scores={}  #no need to ask for scores, ask database
+        else:
+            try:
+                name=""  #initialising empty variables
+                last_name=""
+                email=""
+                userId, unit_scores=getPersonDetails()
+                print(unit_scores) 
+                if unit_scores is None:
+                    raise ValueError("your scores are not eligible, enter scores again")
+            except ValueError as e:
+                print("Error:", e)
+
+        print("Thank you for providing your details...")
+        """
+        userId=12345678
+        name=""
+        last_name=""
+        email=""
+        unit_scores={}
+        unit_scores["abc"]=23.0
+        unit_scores["def"]=25.3
+        """
+        
+        try:
+            socket=ClientSocket.connectSocket()
+
+            while True:
+                message=ClientSocket.messageHandler(userId,unit_scores, name, last_name,email)
+
+
+                ClientSocket.sendMessage(message,socket)
+
+                responce=ClientSocket.decodeData(socket)
+                print("--------------------------------")
+                print(responce)
+                print("--------------------------------")
+                break
+        finally:
+            ClientSocket.closeSocket(socket)
+        
+        if yesOrNo("Would you like to verify the eligibility of another user?")=='n':
+            print("Program is closing")
+            break
+    
+    

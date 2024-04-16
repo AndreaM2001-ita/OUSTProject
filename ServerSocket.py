@@ -26,7 +26,7 @@ def unitScores(data):
 
     for pair in score_pairs:
         unit_code, score = pair.split('=')
-        parsed_scores[unit_code] = int(score)  
+        parsed_scores[unit_code] = float(score)  
 
     return parsed_scores
 
@@ -39,6 +39,7 @@ def decodeData(connection):
         data += connection.recv(3)
     received_data = data.decode()  #decode data
 
+    
     # Parse received data
     parsed_data = {}
     lines = received_data.strip().split('\n')
@@ -47,8 +48,9 @@ def decodeData(connection):
         if line!='\\n':
             key, value = line.split(':')
             parsed_data[key.strip()] = value.strip()
-
-    parsed_data['unit_scores']=unitScores(parsed_data['unit_scores'])
+    if parsed_data['unit_scores']!="{}":
+        parsed_data['unit_scores']=unitScores(parsed_data['unit_scores'])
+    
     return parsed_data
 
 def sendMessage(message,connection):
