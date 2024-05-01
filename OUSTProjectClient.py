@@ -7,7 +7,6 @@
 #
 #   authors:
 #   Andrea Marcosano 10541054
-#   Maryam Saqib 10661276
 #-------------------------------------------------------------
 import ClientSocket
 
@@ -53,13 +52,14 @@ def getId(identity):
     while True:
         try: #student or person ID
             studentId = input(f"Enter your {identity} ID: ") #use identity variable to make fucnction reusable in both settings 
-            # Check if student ID is 8 digits or less
-            if len(str(studentId)) <= 8:
+            # Check if student ID is 8 digits 
+            if len(str(studentId)) == 8:
                 break
             else:
-                print("The user ID entered is too long, try again...")
+                print("The user ID has to be 8 numbers long, try again...")
         except ValueError:
             print("ERROR... wrong user ID ")
+    return studentId
 
 #fucntion to get user details as input
 def getStudentDetails():
@@ -72,13 +72,13 @@ def getStudentDetails():
             break
 
     while True:
-        last_name = input("Enter your last name ")
+        last_name = input("Enter your last name: ")
         # Validate last name
         if verifyString(last_name):
             break
     
     while True:
-        email = input("Enter your personal email address  ")
+        email = input("Enter your personal email address:  ")
         # Validate email
         if isValidEmail(email):
             break
@@ -110,8 +110,7 @@ def isValidMark(unit_code,addition):
 #output in case of missed eligibitlity check
 def missedEligibility():
     print("!!!-----------------------------------------------------------------------")
-    print("Unfortuantely you will not be eligible for Honours")
-    print("No more than 2 fails for one unit allowed")
+    print("Unfortuantely you will not be eligible for Honours, as you presented wrongful information")
     print("!!!-----------------------------------------------------------------------")
 #handling of fails in grades
 def handleFailures(mark, unit_code, unit_scores, fails):
@@ -128,14 +127,25 @@ def handleFailures(mark, unit_code, unit_scores, fails):
             return -1
         new_unit_code = f"{unit_code}_{iterations + 1}"  # Append iteration number to unit code
         unit_scores[new_unit_code] = mark
-        
+#function to ask user how many times they have failed unit if score is less than 50
+def askFailedTimes(unit_code):
+    fails=1
+    while True: #to avoid that user syas that they did not fail
+        try:
+            fails=int(input(f"How many times have you failed unit {unit_code}?: "))  #report failures
+            if fails!=0: 
+                break
+        except ValueError:
+            print("ERROR...Your answer seems incorrect. Try again!")
+    return fails
+
 #function to check if the grade was a fail and if it was how many times it was repeated    
 def checkFail(mark, unit_code,unit_scores):
     while True:
         try:
             if mark<50.0: #grade is a fail
-                fails=int(input(f"How many times have you failed unit {unit_code}?: "))
-                if fails >2:
+                fails=askFailedTimes(unit_code)#ask how many times has class been failed
+                if fails >2 or fails < 0: 
                     missedEligibility()
                     return -1
                 elif fails>0 and fails<=2:
@@ -149,9 +159,9 @@ def checkFail(mark, unit_code,unit_scores):
 
 #get details on person(if not student)
 #For example, OUST doesn’t allow the students do any unit more than three times. 
-def getPersonDetails():
-    person_id=getId("Person")
-    print("As you are not a current student, please enter your unit codes and marks.")
+def getPersonDetails(student):
+    person_id = getId("Person" if student == 'n' else "Student")
+    print("Please enter your unit codes and marks...")
     print("--------------------------------------------------------------------------")
     unit_scores = {}
     while True:
@@ -159,7 +169,7 @@ def getPersonDetails():
             num_units = int(input("Enter the number of units taken: "))
             #checking that number of units is apporpriate
             if num_units <16 or num_units >30:
-                print("ERROR... number of units taken is invalid")
+                print("ERROR... number of units has to be within 16 and 30")
             else:
                 break
         except ValueError:
@@ -169,7 +179,7 @@ def getPersonDetails():
         unit_code = isValidUnitCode(unit)
         mark=isValidMark(unit_code,"")
         if checkFail(mark, unit_code,unit_scores)==-1:
-            return person_id,None  #if theere is a class that user failed more than 3 times program will return non eligibilty
+            return person_id,None  #if theere is a class that user failed more than 3 times program will return non eligibile
     return person_id, unit_scores
 #main
 if __name__ == "__main__":
@@ -180,22 +190,27 @@ if __name__ == "__main__":
         student=yesOrNo("Are you a current student of OUST?")  #ask if it is a student
         #if user is student ask if they want to insert their own scores or they want ot make a request to database
         if student=='y': request=yesOrNo("Would you like to insert your own unit scores?")
-        if student=='y' and request=='y':
+        if student=='y' and request=='n':
             userId, name, last_name, email= getStudentDetails()
             unit_scores={}  #no need to ask for scores, ask database
         else:
-            try:
-                name=""  #initialising empty variables
-                last_name=""
-                email=""
-                userId, unit_scores=getPersonDetails()
-                print(unit_scores) 
-                if unit_scores is None:
-                    raise ValueError("your scores are not eligible, enter scores again")
-            except ValueError as e:
-                print("Error:", e)
+            name=""  #initialising empty variables
+            last_name=""
+            email=""
+            while True:
+                userId, unit_scores=getPersonDetails(student)
+                try:
+                    if unit_scores is None:
+                        raise ValueError("your scores are not eligible. Enter your details again...")
+                    else:
+                        break
+                except ValueError as e:
+                    print("Error: ", e)
 
-        print("Thank you for providing your details...")
+        print(userId)
+        print()
+        print("--------------------------------------------------------------------------")
+        print("Thank you for providing your correct details...")
         """
         userId=12345678
         name=""
@@ -205,7 +220,6 @@ if __name__ == "__main__":
         unit_scores["abc"]=23.0
         unit_scores["def"]=25.3
         """
-        
         try:
             socket=ClientSocket.connectSocket()
 

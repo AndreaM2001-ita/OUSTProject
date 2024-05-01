@@ -9,9 +9,14 @@
 #   authors:
 #   Andrea Marcosano 10541054
 #-------------------------------------------------------------
-import ServerSocket
+import Server1Socket #provide responce to client
+import Pyro4
 import socket
 import sys  #operating system package - save error in machine in case
+
+#Set SA1 Connection Details
+PORT = 51515
+SERVER = "localhost"
 #function to print out the dictionary of the unitcode and correspective scores in order
 def printUnitScores(unitScores):
     for unit_code, score in unitScores.items():
@@ -22,7 +27,7 @@ def calculateAvg(unitScores):
     sum=0
     count=0
     for unit_code, score in unitScores.items():
-        sum=sum+score;
+        sum=sum+score
         count=count+1
     average=sum/count;  #average calculation
     average=round(average, 2)
@@ -47,7 +52,7 @@ def averageEight(scoreList):
     sum=0
     count=0
     for score in scoreList[:8]:  #take first 8 values
-        sum=sum+score;
+        sum=sum+score
         count=count+1
     avgEight=sum/count;  #average calculation
     avgEight=round(avgEight, 2)
@@ -79,32 +84,31 @@ def countFails(unitScores):
 
 #function to verify eligibility of student for honoruns studies
 def verifyEligibility(studentID,unitScores):
-    average=calculateAvg(unitScores);
-    avgEight=selectEightScores(unitScores);
+    average=calculateAvg(unitScores)
+    avgEight=selectEightScores(unitScores)
 
     if len(unitScores)<=15:
         message=studentID+" "+str(average)+ ", completed less than 16 units!\nDOES NOT QUALIFY FOR HONOURS STUDY! "
         return message
     if countFails(unitScores)>=6:
-        message=studentID+" "+str(average)+ ", with 6 or more Fails\nDOES NOT QUALIFY FOR HONOURS STUDY! "
+        message="ID: "+studentID+" AVG: "+str(average)+ ", with 6 or more Fails\nDOES NOT QUALIFY FOR HONOURS STUDY! "
         return message
     if average>=70:
-        message=studentID+" "+str(average)+ ", QUALIFY FOR HONOURS STUDY! "
+        message="ID: "+studentID+" AVG: "+str(average)+ ", QUALIFY FOR HONOURS STUDY! "
     elif average>=65 and avgEight>=80:
-        message=studentID+" "+str(average)+" "+str(avgEight)+", QUALIFY FOR HONOURS STUDY! "
+        message="ID: "+studentID+" AVG: "+str(average)+" AVG8: "+str(avgEight)+", QUALIFY FOR HONOURS STUDY! "
     elif average>=65 and avgEight<80:
-        message=studentID+" "+str(average)+" "+str(avgEight)+ ", MAY HAVE GOOD CHANCE!, Need further assessment!"
+        message="ID: "+studentID+" AVG: "+str(average)+" AVG8: "+str(avgEight)+ ", MAY HAVE GOOD CHANCE!, Need further assessment!"
     elif average>=60 and avgEight>=80:
-        message=studentID+" "+str(average)+" "+str(avgEight)+ ", MAY HAVE A CHANCE!, Must be carefully reassessed and get the coodrinator's permission!"
+        message="ID: "+studentID+" AVG: "+str(average)+" AVG8: "+str(avgEight)+ ", MAY HAVE A CHANCE!, Must be carefully reassessed and get the coodrinator's permission!"
     else:
-        message=studentID+" "+str(average)+ ", DOES NOT QUALIFY FOR HONOURS STUDY! "
+        message="ID: "+studentID+" AVG: "+str(average)+ ", DOES NOT QUALIFY FOR HONOURS STUDY! "
     return message
         
 
 if __name__ == '__main__':
-
-    socket=ServerSocket.connectSocket()
     while True:
+        socket=Server1Socket.connectSocket()
         # Wait for a connection
         print( 'Waiting for a connection')
         connection, client_address = socket.accept()
@@ -114,17 +118,33 @@ if __name__ == '__main__':
         try:
             # Receive the data in small chunks and retransmit it
             while True:
-                data=ServerSocket.decodeData(connection)  #decode recived data 
+                data=Server1Socket.decodeData(connection)  #decode recived data 
+
+                userId=data['user_id']
                 if data['unit_scores']!="{}":
-                    message=verifyEligibility(data['user_id'],data['unit_scores']) #verify eligibility
+                    scores=data['unit_scores']
+                else:
+                    print("requesting scores to database")
+                    uri = "PYRO:OUSTProject@"+SERVER+":"+str(PORT)
+                    honors_Check=Pyro4.Proxy(uri)
+                    print()
+                    print(f"Requesting Data of student number {userId} from Server....")
+                    scores = honors_Check.getScores(userId)
+
+
+
+                if scores!=-1:
+                    message=verifyEligibility(userId,scores) #verify eligibility
                     message+="\\n" # add finish character
                 else:
-                    print("implement database")
-                    message="databse not implemented\\n"
-                ServerSocket.sendMessage(message,connection) #send result
-                #break
+                    message=f"The current Student with id {userId} was not found in the database"
+                    message+="\\n" 
+
+                Server1Socket.sendMessage(message,connection) #send result
+                Server1Socket.closeSocket(socket)
+                break
         finally:
-            ServerSocket.closeSocket(socket)
+            Server1Socket.closeSocket(socket)
             #break
     """
     #example student ID

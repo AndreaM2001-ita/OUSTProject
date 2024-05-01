@@ -6,7 +6,7 @@ def connectSocket():
     # Create a TCP/IP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)#socket
 
-    server_address = ('localhost', 10000)
+    server_address = ('localhost', 20000)
     sock.bind(server_address)#binding to put socket in server
 
     # Listen for incoming connections
@@ -19,7 +19,7 @@ def closeSocket(socket):
     socket.close()
 
 def unitScores(data):
-    score_string = data.strip('{}')  #remocve {}
+    score_string = data.strip('{}')  #remove {}
     score_pairs = score_string.split(', ') #separate values
 
     parsed_scores = {} #dict
