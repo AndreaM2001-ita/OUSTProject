@@ -12,17 +12,20 @@ import ClientSocket
 
 #function to welcome user
 def welcome():
-    print("Welcome to the OUST Honours Enrolling systems!")
-    print("before proceeding with your enrollement we would like to verify your eligibility")
-    print("----------------------------------------------------------------")
+    print()
+    print("=============Welcome to the OUST Honours Enrolling systems!=====================")
+    print("Before proceeding with your enrollement we would like to verify your eligibility")
+    print("--------------------------------------------------------------------------------")
+    print()
 #multiuse function to ask user for any request with an answer that requires to be y or n
 def yesOrNo(question):
     while True:
         try:
             print(question)
-            answer = input("Enter Y/N for Yes/No: ")
+            answer = input("->Enter Y/N for Yes/No: ")
             answer=answer.lower()#make it lower case to avoid issues with upper case
             if answer=='y' or answer=='n':
+                print()
                 break
             else:
                 print("Looks like you've entered an unrecognised character, try again")
@@ -84,12 +87,17 @@ def getStudentDetails():
             break
     return student_id, name,last_name,email
 # Function to validate unit code
-def isValidUnitCode(unit):
+def isValidUnitCode(unit,unit_scores):
     while True:
+        print("----------------------------------------------------------------")
         unit_code=input(f"Enter unit code for unit {unit + 1}: " )
         # Check if the unit code is 7 characters or less
         if len(unit_code) <= 7:  #length on assignment script
-            return unit_code
+            if unit_code not in unit_scores: #verify that same unit has not been provided yet
+                return unit_code
+            else:     
+                print("->Error... Unit details already provided... Enter a new unit")
+        
         else:
             print("Error... Unit code should be 7 characters or less. Please try again!.")
 
@@ -115,29 +123,29 @@ def missedEligibility():
 #handling of fails in grades
 def handleFailures(mark, unit_code, unit_scores, fails):
     iterations=0
-    new_unit_code = f"{unit_code}_{iterations + 1}"  # Append iteration number to unit code
-    unit_scores[new_unit_code] = mark
+    # new_unit_code = f"{unit_code}_{iterations + 1}"  # Append iteration number to unit code
+    unit_scores[unit_code] = mark #keep this with normal unit code so that there cannot be a repetition in system scores
     while iterations<fails:
         iterations+=1
         #if it the last unit the program should ask for a passing score 
-        #otherwise th eonly other case is interting a second fail score
+        #otherwise the only other case is inserting a second fail score
         mark = isValidMark(unit_code, "passing" if iterations==(fails) else "second")
         if mark<50.0 and iterations==fails: #case in which user is trying to enter 3 fails, whilst only admitting 2
             missedEligibility()
             return -1
-        new_unit_code = f"{unit_code}_{iterations + 1}"  # Append iteration number to unit code
-        unit_scores[new_unit_code] = mark
+        new_unit_code = f"{unit_code}_{iterations}"  # Append iteration number to unit code
+        unit_scores[new_unit_code] = mark # Append iteration number to unit code
 #function to ask user how many times they have failed unit if score is less than 50
 def askFailedTimes(unit_code):
     fails=1
     while True: #to avoid that user syas that they did not fail
         try:
-            fails=int(input(f"How many times have you failed unit {unit_code}?: "))  #report failures
+            fails=int(input(f"->How many times have you failed unit {unit_code}?: "))  #report failures
             if fails!=0: 
-                break
+                return fails
         except ValueError:
             print("ERROR...Your answer seems incorrect. Try again!")
-    return fails
+    
 
 #function to check if the grade was a fail and if it was how many times it was repeated    
 def checkFail(mark, unit_code,unit_scores):
@@ -154,6 +162,7 @@ def checkFail(mark, unit_code,unit_scores):
                     break
             else:
                 unit_scores[unit_code] = mark
+                break
         except ValueError:
             print("ERROR...Your answer seems incorrect. Try again!")
 
@@ -176,10 +185,11 @@ def getPersonDetails(student):
             print("Error... wrong value")
     #insert unit scores 
     for unit in range(num_units):
-        unit_code = isValidUnitCode(unit)
+        unit_code = isValidUnitCode(unit,unit_scores)
         mark=isValidMark(unit_code,"")
         if checkFail(mark, unit_code,unit_scores)==-1:
             return person_id,None  #if theere is a class that user failed more than 3 times program will return non eligibile
+        #print(unit_scores)
     return person_id, unit_scores
 #main
 if __name__ == "__main__":
@@ -207,19 +217,11 @@ if __name__ == "__main__":
                 except ValueError as e:
                     print("Error: ", e)
 
-        print(userId)
+        print("Requesting details for StudentID: "+ userId)
         print()
         print("--------------------------------------------------------------------------")
         print("Thank you for providing your correct details...")
-        """
-        userId=12345678
-        name=""
-        last_name=""
-        email=""
-        unit_scores={}
-        unit_scores["abc"]=23.0
-        unit_scores["def"]=25.3
-        """
+
         try:
             socket=ClientSocket.connectSocket()
 
@@ -235,10 +237,11 @@ if __name__ == "__main__":
                 print("--------------------------------")
                 break
         finally:
-            ClientSocket.closeSocket(socket)
+            if socket:
+                ClientSocket.closeSocket(socket)
         
         if yesOrNo("Would you like to verify the eligibility of another user?")=='n':
-            print("Program is closing")
+            print("Program is closing...")
             break
     
     

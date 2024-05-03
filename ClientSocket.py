@@ -11,7 +11,8 @@ def connectSocket():
 
             # Connect the socket to the port where the server is listening
             server_address = ('localhost', 20000)
-            print('connecting to %s port %s' % server_address)
+            print('-> Creating a connection to %s port %s' % server_address)
+            print()
             sock.connect(server_address)
             return sock
         except ConnectionRefusedError:  #in case connection is rerfused because server is down 
@@ -22,7 +23,7 @@ def connectSocket():
 #function to close socket
 def closeSocket(socket):
     
-    print('closing socket')
+    print('->closing socket')
     socket.close()
 
 #fucntion to create a message within one string to be sent to server 

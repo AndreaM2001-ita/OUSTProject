@@ -130,9 +130,7 @@ if __name__ == '__main__':
                     print()
                     print(f"Requesting Data of student number {userId} from Server....")
                     scores = honors_Check.getScores(userId)
-
-
-
+                    
                 if scores!=-1:
                     message=verifyEligibility(userId,scores) #verify eligibility
                     message+="\\n" # add finish character

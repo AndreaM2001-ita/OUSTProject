@@ -8,9 +8,6 @@ SQL_SERVER_DB = "OUSTProject"
 #Set Server2 Serving Details
 SA1_PORT = 51515
 
-
-
-
 @Pyro4.expose
 class db(object):
     #Perform Database Lookup
