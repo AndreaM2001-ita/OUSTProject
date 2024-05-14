@@ -2,6 +2,8 @@ import socket
 import time
 import sys
 
+
+#function to connect socket from client to server 1
 def connectSocket():
 
     for attempt in range(5): #retry connection for 5 times
@@ -20,7 +22,7 @@ def connectSocket():
             time.sleep(1)  # Wait before retrying
             continue
 
-#function to close socket
+#function to close socket from client to server 1 
 def closeSocket(socket):
     
     print('->closing socket')
@@ -65,26 +67,3 @@ def decodeData(socket):
     received_data = data.decode() 
     
     return received_data
-
-"""
-
-
-    
-
-
-    # Send data
-    message = 'This is the message.  It will be repeated.'
-    print('sending "%s"' % message)
-    sock.sendall(message.encode())
-
-    # Look for the response
-    amount_received = 0
-    amount_expected = len(message)
-    
-    while amount_received < amount_expected:
-        data = sock.recv(16)
-        amount_received += len(data)
-        print('received "%s"' % data)
-
-###
-"""

@@ -91,14 +91,14 @@ CREATE TABLE Unit
 
 --insert valuent into table student
 INSERT INTO Student
-VALUES ('20241201', 'Jim', 'MAX', 'j.max@our.oust.edu.au', '2024120201'),
-		('20241202', 'Jit', 'MAX', 'jt.max@our.oust.edu.au', '2024120202'),
-		('20241203', 'Late', 'MAX', 'l.max@our.oust.edu.au', '2024120203'),
-		('20241204', 'Rep', 'SMITH', 'r.smith@our.oust.edu.au', '2024120204'),
-		('20241205', 'Paul', 'Landan', 'p.landan@our.oust.edu.au', '2024120205'),
-		('20241206', 'Peter', 'London', 'p.london@our.oust.edu.au', '2024120206'),
-		('20241207', 'John', 'Turner', 'j.turner@our.oust.edu.au', '2024120207'),
-		('20241208', 'Jim', 'XIAO', 'j.XIAO@our.oust.edu.au', '2024120208');
+VALUES ('20241201', 'jim', 'MAX', 'j.max@our.oust.edu.au', '2024120201'),
+		('20241202', 'jit', 'MAX', 'jt.max@our.oust.edu.au', '2024120202'),
+		('20241203', 'late', 'MAX', 'l.max@our.oust.edu.au', '2024120203'),
+		('20241204', 'rep', 'SMITH', 'r.smith@our.oust.edu.au', '2024120204'),
+		('20241205', 'paul', 'LANDAN', 'p.landan@our.oust.edu.au', '2024120205'),
+		('20241206', 'peter', 'LONDON', 'p.london@our.oust.edu.au', '2024120206'),
+		('20241207', 'john', 'TURNER', 'j.turner@our.oust.edu.au', '2024120207'),
+		('20241208', 'jim', 'XIAO', 'j.XIAO@our.oust.edu.au', '2024120208');
 
 
 --insert valuent into table Coordinator

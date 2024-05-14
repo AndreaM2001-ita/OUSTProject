@@ -72,12 +72,14 @@ def getStudentDetails():
         name = input("Enter your name: ")
         # Validate name
         if verifyString(name):
+            name=name.lower()
             break
 
     while True:
         last_name = input("Enter your last name: ")
         # Validate last name
         if verifyString(last_name):
+            last_name=last_name.upper()
             break
     
     while True:
@@ -141,7 +143,7 @@ def askFailedTimes(unit_code):
     while True: #to avoid that user syas that they did not fail
         try:
             fails=int(input(f"->How many times have you failed unit {unit_code}?: "))  #report failures
-            if fails!=0: 
+            if fails!=0: # user could say that they nevwer failed even though they just reported a failure
                 return fails
         except ValueError:
             print("ERROR...Your answer seems incorrect. Try again!")
@@ -156,9 +158,9 @@ def checkFail(mark, unit_code,unit_scores):
                 if fails >2 or fails < 0: 
                     missedEligibility()
                     return -1
-                elif fails>0 and fails<=2:
-                    if handleFailures(mark, unit_code, unit_scores, fails)==-1:
-                        return -1
+                elif fails>0 and fails<=2: #checking if the number of fails is acceptable
+                    if handleFailures(mark, unit_code, unit_scores, fails)==-1:  #if it is acceptable the system needs to handle those failures in particular way 
+                        return -1  # if there is a mistake in the input, as user can insert erranous data, the eligibility test should not be carried out 
                     break
             else:
                 unit_scores[unit_code] = mark
@@ -173,6 +175,7 @@ def getPersonDetails(student):
     print("Please enter your unit codes and marks...")
     print("--------------------------------------------------------------------------")
     unit_scores = {}
+    #enter the number of units
     while True:
         try:
             num_units = int(input("Enter the number of units taken: "))
@@ -183,6 +186,7 @@ def getPersonDetails(student):
                 break
         except ValueError:
             print("Error... wrong value")
+
     #insert unit scores 
     for unit in range(num_units):
         unit_code = isValidUnitCode(unit,unit_scores)
@@ -191,6 +195,7 @@ def getPersonDetails(student):
             return person_id,None  #if theere is a class that user failed more than 3 times program will return non eligibile
         #print(unit_scores)
     return person_id, unit_scores
+
 #main
 if __name__ == "__main__":
     while True:
@@ -227,7 +232,6 @@ if __name__ == "__main__":
 
             while True:
                 message=ClientSocket.messageHandler(userId,unit_scores, name, last_name,email)
-
 
                 ClientSocket.sendMessage(message,socket)
 

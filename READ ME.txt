@@ -1,0 +1,28 @@
+INSTRUCTIONS
+
+1)open new terminal
+2)navigate  to assessment folder
+3)RUN - pip install pyro4 (if not yet installed)
+4)RUN - pip install pyodbc (if not yet installed)
+
+5)open SSMS
+6)open OUSTProject_database
+7)execute database file
+
+8)go back to the terminal 1 
+9)RUN - python interfaceDb.py
+10)insert name of your databse server
+
+6) open second interface
+7) navigate to assessment folder 
+7) RUN - python OUSTProjectServer1.py
+
+8)open new terminal
+9)navigate to assessment folder
+10)follow instructions from client
+
+Details of one of the students in database:
+20241201
+jim 
+max  
+j.max@our.oust.edu.au
